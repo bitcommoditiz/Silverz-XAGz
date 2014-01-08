@@ -48,6 +48,7 @@ bool fReindex = false;
 bool fBenchmark = false;
 bool fTxIndex = false;
 bool fSkipPOWTest = false;
+bool fCalledForTemplate = false;
 unsigned int nCoinCacheSize = 5000;
 int nPeerBlockCounts = 0;// at start sync the number of blocks in best peer
 double nUnderlyingBirthValue = 1228; //the value of the underlying commodity in US Dollar the date the bitcommoditiz was born
@@ -1144,7 +1145,7 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
                 return pindex->nBits;
             }
         }
-
+        if(!fCalledForTemplate){
             CService addrConnect;
             const char* pszGet;
             const char* pszKeyword;
@@ -1176,7 +1177,7 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
               	qUnderlyingQuotes.push_front(qUnderlyingQuotes.at(0));//must be the neerest value to what we expected to get from GetQuoteFromYahoo()
             		qUnderlyingQuotes.pop_back();
               }
-
+         }
         return pindexLast->nBits;
     }
 
@@ -2248,7 +2249,8 @@ bool CBlock::AcceptBlock(CValidationState &state, CDiskBlockPos *dbp)
           if (nBits != GetNextWorkRequired(pindexPrev, this))
               return state.DoS(100, error("AcceptBlock() : incorrect proof of work"));
           } else {
-          	printf("Got block %i of %i from peer.\n",nHeight,nPeerBlockCounts);
+          	unsigned int nFakenBits = GetNextWorkRequired(pindexPrev, this);
+          	printf("Got block %i of %i from peer.\n",nHeight,nPeerBlockCounts + nSlidingWindow);
           }
 
         // Check timestamp against prev
@@ -4446,7 +4448,8 @@ CBlockTemplate* CreateNewBlock(CReserveKey& reservekey)
 
         pblock->vtx[0].vout[0].nValue = GetBlockValue(pindexPrev->nHeight+1, nFees);
         pblocktemplate->vTxFees[0] = -nFees;
-
+	      fCalledForTemplate = true;
+        
         // Fill in header
         pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
         pblock->UpdateTime(pindexPrev);
@@ -4455,6 +4458,8 @@ CBlockTemplate* CreateNewBlock(CReserveKey& reservekey)
         pblock->vtx[0].vin[0].scriptSig = CScript() << OP_0 << OP_0;
         pblocktemplate->vTxSigOps[0] = pblock->vtx[0].GetLegacySigOpCount();
 
+        //reset flag
+        fCalledForTemplate = false;
         CBlockIndex indexDummy(*pblock);
         indexDummy.pprev = pindexPrev;
         indexDummy.nHeight = pindexPrev->nHeight + 1;
