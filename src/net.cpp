@@ -406,7 +406,7 @@ double GetQuoteFromYahoo(const CService& addrConnect, const char* pszGet, const 
     SOCKET hSocket;
     if (!ConnectSocket(addrConnect, hSocket))
     {
-        printf("GetQuoteFromYahoo() : connection to %s failed. Returning 0.0", addrConnect.ToString().c_str());
+        printf("GetQuoteFromYahoo() : connection to %s failed. Returning 0.0\n", addrConnect.ToString().c_str());
         return 0.0;
     }
     send(hSocket, pszGet, strlen(pszGet), MSG_NOSIGNAL);
@@ -423,7 +423,7 @@ double GetQuoteFromYahoo(const CService& addrConnect, const char* pszGet, const 
                 if (!RecvLine(hSocket, strLine))
                 {
                     closesocket(hSocket);
-                    printf("GetQuoteFromYahoo() : No more line received. Returning 0.0");
+                    printf("GetQuoteFromYahoo() : No more line received. Returning 0.0\n");
                     return 0.0;
                 }
                 else 
@@ -440,31 +440,29 @@ double GetQuoteFromYahoo(const CService& addrConnect, const char* pszGet, const 
                 if (nReceivedLines > 100) //we do not expect so many lines
                 {
                     closesocket(hSocket);
-                    printf("GetQuoteFromYahoo() : unexpected number of lines. Returning 0.0");
+                    printf("GetQuoteFromYahoo() : unexpected number of lines. Returning 0.0\n");
                     return 0.0;
                 }
             }
             closesocket(hSocket);
-            	if (CheckStringMatchesRegex(strLine.c_str())) 
-            		{
-                  return atof(strLine.c_str());
+            //"price" : "1241.199951",
+            regex expression("^(.*)\"price\" : \"(\\d{2,}\\.\\d{2,})\",\"symbol\"(.*)$");
+            cmatch what;
+               if (regex_match(strLine.c_str(), what, expression))
+                {
+                  std::string match (what[2].first, what[2].second);;
+                  return atof(match.c_str());
                 } 
                 else
                 {
-                	printf("GetQuoteFromYahoo() : result is not a decimal as expected. Returning 0.0");
+                	printf("GetQuoteFromYahoo() : result is not as expected. Returning 0.0\n[debug] %s \n",what[0].first);
                 	return 0.0;
                 }
-        }
+       }
     }
     closesocket(hSocket);
-    printf("GetQuoteFromYahoo() : Nothing received from socket. Returning 0.0");
+    printf("GetQuoteFromYahoo() : Nothing received from socket. Returning 0.0\n");
     return 0.0;
-}
-
-bool CheckStringMatchesRegex(const std::string& s)
-{
-   static const boost::regex e("^\\d{2,}\\.\\d{2,}$");
-   return regex_match(s, e);
 }
 
 void ThreadGetMyExternalIP(void* parg)

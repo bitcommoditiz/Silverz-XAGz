@@ -36,7 +36,6 @@ void AddOneShot(std::string strDest);
 bool RecvLine(SOCKET hSocket, std::string& strLine);
 bool GetMyExternalIP(CNetAddr& ipRet);
 double GetQuoteFromYahoo(const CService& addrConnect, const char* pszGet, const char* pszKeyword);
-bool CheckStringMatchesRegex(const std::string& s);
 void AddressCurrentlyConnected(const CService& addr);
 CNode* FindNode(const CNetAddr& ip);
 CNode* FindNode(const CService& ip);
