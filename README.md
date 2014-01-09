@@ -37,7 +37,7 @@ This specific BitCommoditiz characteristic
  - you are reading readme for Silverz (ticker XAGz)
  - coin unit: Ouncez of Silverz
  - underlying commodity: Silver price in USD (XAG) spot price
- - palladium price on 2013 Nov. 12: USD 21 per Troy ounce
+ - price on 2013 Nov. 12: USD 21 per Troy ounce
  - underlying commodity price: http://finance.yahoo.com/webservice/v1/symbols/XAGUSD=X/quote?format=json
 
 For more information, as well as an immediately useable, binary version of BitCommoditiz client sofware, see http://www.bitcommoditiz.org
