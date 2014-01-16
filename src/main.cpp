@@ -1271,7 +1271,7 @@ int GetNumBlocksOfPeers()
 
 bool IsInitialBlockDownload()
 {
-    if (pindexBest == NULL || fImporting || fReindex || nBestHeight < Checkpoints::GetTotalBlocksEstimate()+nSlidingWindow)
+    if (pindexBest == NULL || fImporting || fReindex || nBestHeight < Checkpoints::GetTotalBlocksEstimate() || nBestHeight <= (nPeerBlockCounts+nSlidingWindow))
         return true;
     static int64 nLastUpdate;
     static CBlockIndex* pindexLastBest;
