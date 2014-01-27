@@ -1180,6 +1180,11 @@ unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast, const CBl
         return pindexLast->nBits;
     }
 
+    //retarget: if not enough quotes to provide accurate nBits return a fake nBits value so that we throw an rpc error
+    if(fCalledForTemplate && fSkipPOWTest){
+    	return 0;
+    }
+    
     // XAGz: This fixes an issue where a 51% attack can change difficulty at will.
     // Go back the full period unless it's the first retarget after genesis. Code courtesy of Art Forz
     int blockstogoback = nInterval-1;
@@ -1271,7 +1276,7 @@ int GetNumBlocksOfPeers()
 
 bool IsInitialBlockDownload()
 {
-    if (pindexBest == NULL || fImporting || fReindex || nBestHeight < Checkpoints::GetTotalBlocksEstimate() || nBestHeight <= (nPeerBlockCounts+nSlidingWindow))
+    if (pindexBest == NULL || fImporting || fReindex || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
         return true;
     static int64 nLastUpdate;
     static CBlockIndex* pindexLastBest;
